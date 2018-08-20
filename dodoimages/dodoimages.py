@@ -145,6 +145,26 @@ def _find_dim(image_paths: list, largest=True) -> tuple:
     return w, h
 
 
+def _add_borders(im: Image, dims: tuple) -> Image:
+    """Adds black borders to an image
+
+       :param im: a PIL.Image
+       :param dims: a tuple with the new image width and height
+    """
+    w, h = dims
+    old_w, old_h = im.size
+
+    if old_h == h and old_w == w:
+        return im
+
+    # TODO check when dims are smaller than image dims
+    background = Image.new("RGB", dims)
+    background.paste(im, (int((background.size[0] - im.size[0]) / 2),
+                          int((background.size[1] - im.size[1]) / 2)))
+
+    return background
+
+
 def add_borders(image_paths):
     """Adds black borders to images, in order to make all of them the same size as the largest image.
 
@@ -154,28 +174,7 @@ def add_borders(image_paths):
 
     for p in tqdm(image_paths, desc="Adding borders"):
         with Image.open(p) as im:
-            old_w, old_h = im.size
-
-            if old_h == max_dim and old_w == max_dim:
-                continue
-
-            # Set number of pixels to expand to the left, top, right,
-            # and bottom, making sure to account for even or odd numbers
-            add_top = add_bottom = (max_dim - old_h) // 2
-            if old_h % 2 != 0:
-                add_bottom += 1
-
-            add_left = add_right = (max_dim - old_w) // 2
-            if old_w % 2 != 0:
-                add_right += 1
-
-            left = int(add_left)
-            top = int(add_top)
-            right = int(add_right)
-            bottom = int(add_bottom)
-
-            # By default, the added pixels are black
-            new_im = ImageOps.expand(im, border=(left, top, right, bottom))
+            new_im = _add_borders(im, (max_dim, max_dim))
             new_im.save(p)
 
 
