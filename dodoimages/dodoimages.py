@@ -197,19 +197,8 @@ def smart_scale(image_paths: list, dims: tuple = None, black_borders: bool = Fal
         with Image.open(p) as im:
             im.thumbnail(dims, Image.ANTIALIAS)
 
-            if old_h == max_dim or old_w == max_dim:
-                continue
-
-            if old_h >= old_w:
-                new_h = max_dim
-                new_w = int(old_w * max_dim / old_h)
-            else:
-                new_w = max_dim
-                new_h = int(old_h * max_dim / old_w)
-
-            # By default, the added pixels are black
-            new_im = im.resize((new_w, new_h))
-            new_im.save(p)
+            if black_borders:
+                im = _add_borders(im, dims)
 
             im.save(p)
 
@@ -283,7 +272,6 @@ def remove_background_countours(image_path,
 
     # blend masked img into MASK_COLOR background
     # use float matrices, for easy blending
-    mask_stack = mask_stack.astype('float32') / 255.0
     img = img.astype('float32') / 255.0
 
     # dividir em rgb
@@ -329,4 +317,3 @@ def composite_image(background_path, foreground_path, offset, output_path):
         output_path = filename + '.png'
 
     background.save(output_path)
-
