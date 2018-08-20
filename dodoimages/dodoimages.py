@@ -135,12 +135,14 @@ def remove_duplicates(image_paths, threshold=.8):
         del p1, im1
 
 
-def _find_largest_dim(image_paths):
-    max_dim = 0
+def _find_dim(image_paths: list, largest=True) -> tuple:
+    w = h = 0 if largest else float('inf')
+    func = max if largest else min
     for p in tqdm(image_paths, desc='Loading images'):
         with Image.open(p) as im:
-            max_dim = max(max_dim, im.size[0], im.size[1])
-    return max_dim
+            w = func(w, im.size[0])
+            h = func(h, im.size[1])
+    return w, h
 
 
 def add_borders(image_paths):
@@ -148,7 +150,7 @@ def add_borders(image_paths):
 
        :param image_paths: a list containing the paths of the images to be processed
     """
-    max_dim = _find_largest_dim(image_paths)
+    max_dim = max(_find_dim(image_paths))
 
     for p in tqdm(image_paths, desc="Adding borders"):
         with Image.open(p) as im:
