@@ -178,12 +178,24 @@ def add_borders(image_paths):
             new_im.save(p)
 
 
-def smart_scale(image_paths):
-    max_dim = _find_largest_dim(image_paths)
+def smart_scale(image_paths: list, dims: tuple = None, black_borders: bool = False):
+    """
+    Scales a set of images so that they all have the same dimensions.
+    Images are first scaled in either height or width (whichever one
+    is possible to maximize), while keeping aspect ratio.
+    The other dimension is then filled with black pixels.
+    :param image_paths: a list containing the paths of all images to be scaled
+    :param dims: the new (width, height) dimensions all images should have
+    :param black_borders: whether to add black borders to the images after scaling.
+                          If False, images are just scaled while keeping aspect ratio
+    :return:
+    """
+    if dims is None:
+        dims = max(_find_dim(image_paths))
 
     for p in tqdm(image_paths, desc="Resizing"):
         with Image.open(p) as im:
-            old_w, old_h = im.size
+            im.thumbnail(dims, Image.ANTIALIAS)
 
             if old_h == max_dim or old_w == max_dim:
                 continue
@@ -198,6 +210,8 @@ def smart_scale(image_paths):
             # By default, the added pixels are black
             new_im = im.resize((new_w, new_h))
             new_im.save(p)
+
+            im.save(p)
 
 
 def remove_background_grabcut(image_path,
