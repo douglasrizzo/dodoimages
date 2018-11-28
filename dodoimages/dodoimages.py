@@ -102,6 +102,8 @@ def remove_duplicates(image_paths, threshold=.8):
     pbar = tqdm(
         total=sum(range(len(image_paths))) - 1, desc='Searching for duplicates')
 
+    removed = 0
+
     while len(image_paths) > 0:
         p1 = image_paths[0]
         im1 = data[0]
@@ -119,6 +121,7 @@ def remove_duplicates(image_paths, threshold=.8):
                     data[0] = im2
 
                 os.remove(p1)
+                removed += 1
                 image_paths = image_paths[1:]
                 data = data[1:]
                 pbar = tqdm(
@@ -128,6 +131,8 @@ def remove_duplicates(image_paths, threshold=.8):
         image_paths = image_paths[1:]
         data = data[1:]
         del p1, im1
+
+    print('Done. {} duplicates removed.'.format(removed))
 
 
 def _find_dim(image_paths: list, largest=True) -> tuple:
