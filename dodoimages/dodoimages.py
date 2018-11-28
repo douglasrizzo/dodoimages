@@ -32,21 +32,18 @@ def remove_border(filepath):
        Image is overwritten after being cropped.
 
        :param filepath: the path to the image"""
-    try:
+    bbox = isolate_from_uniform_background(filepath)
+    if bbox:
+        bbox_area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
         im = Image.open(filepath)
-        bbox = isolate_from_uniform_background(im)
-        if bbox:
-            bbox_area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
-            im_area = im.size[0] * im.size[1]
-            bbox_proportion = bbox_area / im_area
-            if bbox_proportion < .999:
-                directory = os.path.dirname(os.path.abspath(filepath))
-                new_image = os.path.basename(filepath)
-                # new_image, file_extension = os.path.splitext(new_image)
-                new_image_name = directory + '/' + new_image
-                im.crop(bbox).save(new_image_name)
-    except:
-        print('Could not load {}'.format(filepath))
+        im_area = im.size[0] * im.size[1]
+        bbox_proportion = bbox_area / im_area
+        if bbox_proportion < .999:
+            directory = os.path.dirname(os.path.abspath(filepath))
+            new_image = os.path.basename(filepath)
+            # new_image, file_extension = os.path.splitext(new_image)
+            new_image_name = directory + '/' + new_image
+            im.crop(bbox).save(new_image_name)
 
 
 def delete_corrupt(image_paths):
@@ -81,8 +78,6 @@ def remove_borders(image_paths):
                 pool.imap(remove_border, image_paths),
                 total=len(image_paths),
                 desc="Trimming borders"))
-
-    # for x in tqdm(files, desc='Trimming borders'):
 
 
 def remove_duplicates(image_paths, threshold=.8):
