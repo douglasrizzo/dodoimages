@@ -91,7 +91,7 @@ def remove_duplicates(image_paths, threshold=.8):
        :param threshold: the similarity threshold after which two images are considered equal."""
 
     data = [
-        resize(imread(p, as_grey=True), (100, 100))
+        resize(imread(p, as_gray=True), (100, 100))
         for p in tqdm(image_paths, desc='Loading images')
     ]
 
